@@ -1,9 +1,6 @@
 #include "chatserver.hpp"
 #include "json.hpp"
-<<<<<<< HEAD
 #include "chatservice.hpp"
-=======
->>>>>>> f67b2c73fd315d6d22fe0f33ea952686af992938
 
 #include <iostream>
 #include <functional>
@@ -36,7 +33,6 @@ void ChatServer::start()
 
 // 上报链接相关信息的回调函数
 void ChatServer::onConnection(const TcpConnectionPtr &conn)
-<<<<<<< HEAD
 {   
     // 客户端断开连接
     if(!conn->connected())
@@ -45,18 +41,12 @@ void ChatServer::onConnection(const TcpConnectionPtr &conn)
     }
 }
 
-=======
-{
-
-}
->>>>>>> f67b2c73fd315d6d22fe0f33ea952686af992938
 
 // 上报读写事件相关信息的回调函数
 void ChatServer::onMessage(const TcpConnectionPtr &conn,
                            Buffer *buffer,
                            Timestamp time)
 {
-<<<<<<< HEAD
     string buf = buffer->retrieveAllAsString();
 
     // 测试，添加json打印代码
@@ -69,7 +59,4 @@ void ChatServer::onMessage(const TcpConnectionPtr &conn,
     auto msgHandler = ChatService::instance()->getHandler(js["msgid"].get<int>());
     // 回调消息绑定好的事件处理器，来执行相应的业务处理
     msgHandler(conn, js, time);
-=======
-
->>>>>>> f67b2c73fd315d6d22fe0f33ea952686af992938
 }
