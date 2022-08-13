@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            // 此处可包含头文件路径
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
+// gcc -I 头文件路径 -L 库文件路径 -l 库文件名称,如muduo_net,muduo_base
+// usr/lib  usr/local/include(muduo库所在路径)等库文件路径可以不包含，因为在环境变量中已配置
