@@ -49,7 +49,7 @@ bool MySQL::update(string sql)
                  << sql << "更新失败!";
         return false;
     }
-
+    // 查询成功返回true(mysql_query返回 0，不走条件语句)，失败返回false(mysql_query返回 非0，走条件语句)
     return true;
 }
 
