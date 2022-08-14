@@ -16,10 +16,10 @@ ChatService *ChatService::instance()
 ChatService::ChatService()
 {
     // 用户基本业务管理相关事件处理回调注册
-    _msgHandlerMap.insert({LOGIN_MSG, std::bind(&ChatService::login, this, _1, _2, _3)});
+    _msgHandlerMap.insert({LOGIN_MSG, std::bind(&ChatService::login, this, _1, _2, _3)}); // 用户登录事务
     // _msgHandlerMap.insert({LOGINOUT_MSG, std::bind(&ChatService::loginout, this, _1, _2, _3)});
-    _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::reg, this, _1, _2, _3)});
-    // _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, _1, _2, _3)});
+    _msgHandlerMap.insert({REG_MSG, std::bind(&ChatService::reg, this, _1, _2, _3)}); // 用户注册事务
+    _msgHandlerMap.insert({ONE_CHAT_MSG, std::bind(&ChatService::oneChat, this, _1, _2, _3)}); // 点对点聊天事务
     // _msgHandlerMap.insert({ADD_FRIEND_MSG, std::bind(&ChatService::addFriend, this, _1, _2, _3)});
 
     // // 群组业务管理相关事件处理回调注册
@@ -62,13 +62,15 @@ MsgHandler ChatService::getHandler(int msgid)
 }
 
 // 处理登录业务
-void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time){
+void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time)
+{
     int id = js["id"].get<int>();
     string pwd = js["password"];
 
     User user = _userModel.query(id);
     // 校验密码
-    if(user.getId() == id && user.getPwd() == pwd){
+    if(user.getId() == id && user.getPwd() == pwd)
+    {
         if(user.getState() == "online")
         {
             // 当前用户已经登录，不允许重新登录
@@ -136,6 +138,51 @@ void ChatService::reg(const TcpConnectionPtr &conn, json &js, Timestamp time)
         conn->send(response.dump());
     }
 }
+
+// 处理客户端异常退出
+void ChatService::clientCloseException(const TcpConnectionPtr &conn){
+    User user;
+    {
+        lock_guard<mutex> lock(_connMutex);
+        for(auto it = _userConnMap.begin(); it != _userConnMap.end(); ++it)
+        {
+            if(it->second == conn)
+            {
+                // 从map表删除用户的连接信息
+                user.setId(it->first); // 设置user的id为连接的id
+                _userConnMap.erase(it); // 移除
+                break;
+            }
+        }
+
+    }
+
+    // 更新用户状态信息
+    if(user.getId() != -1)
+    {
+        user.setState("offline");
+       _userModel.updateState(user);
+    }
+}
+
+void ChatService::oneChat(const TcpConnectionPtr &conn, json &js, Timestamp time)
+{
+    int toid = js["to"].get<int>();
+    {
+        lock_guard<mutex> lock(_connMutex);
+        auto it = _userConnMap.find(toid);
+        if(it != _userConnMap.end())
+        {
+            // toid在线，转发消息   服务器主动推送消息给toid用户
+            it->second->send(js.dump());
+            return;
+        }
+
+    }
+
+    // 离线消息
+}
+
 
 // // 处理登录业务  id  pwd   pwd
 // void ChatService::login(const TcpConnectionPtr &conn, json &js, Timestamp time)
