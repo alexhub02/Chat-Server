@@ -3,7 +3,7 @@
 
 // 数据库配置信息
 static string server = "127.0.0.1";
-static string user = "root";
+static string user = "myself";
 static string password = "123456";
 static string dbname = "chat";
 
@@ -42,6 +42,7 @@ bool MySQL::connect()
 // 更新操作
 bool MySQL::update(string sql)
 {
+    // 如果查询成功，返回0。如果出现错误，返回非0值
     if (mysql_query(_conn, sql.c_str()))
     {
         LOG_INFO << __FILE__ << ":" << __LINE__ << ":"
