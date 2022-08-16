@@ -13,7 +13,7 @@ bool GroupModel::createGroup(Group &group)
     if (mysql.connect())
     {
         // 走分支 -> update返回true -> 更新成功 ->之前没有这个组
-        if (mysql.update(sql)) // 如果查询成功(返回0，找到了，那就说明之前就有了，无法进入该分支)
+        if (mysql.update(sql)) 
         {
             group.setId(mysql_insert_id(mysql.getConnection())); // 这个连接创建的数据对应的主键拿出来赋给实参group
             return true;
